@@ -60,34 +60,56 @@ pipeline {
             }
         }
 
-        stage('Update Deployment File') {
+stage('Update Deployment File') {
 
-            environment {
-                GIT_REPO_NAME = "java-mavn-sonarqube-argocd"
-                GIT_USER_NAME = "Afthabahammed"
-            }
+    environment {
+        GIT_REPO_NAME = "java-mavn-sonarqube-argocd"
+        GIT_USER_NAME = "Afthabahammed"
+    }
 
-            steps {
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'github',
-                        usernameVariable: 'GITHUB_USERNAME',
-                        passwordVariable: 'GITHUB_TOKEN'
-                    )
-                ]) {
-                    sh '''
-                        git config user.email "afthabvadassery@gmail.com"
-                        git config user.name "${GIT_USER_NAME}"
+    steps {
+        withCredentials([
+            usernamePassword(
+                credentialsId: 'github',
+                usernameVariable: 'GITHUB_USERNAME',
+                passwordVariable: 'GITHUB_TOKEN'
+            )
+        ]) {
+            sh '''
+                echo "===================================="
+                echo "Update Deployment File"
+                echo "===================================="
 
-                        sed -i "s|image: .*|image: afthab12/spring-boot-app:${BUILD_NUMBER}|g" spring-boot-app-manifests/deployment.yml
+                echo "Current directory:"
+                pwd
 
-                        git add spring-boot-app-manifests/deployment.yml
-                        git commit -m "Update java-mavn image tag to ${BUILD_NUMBER} [skip ci]" || echo "No changes to commit"
+                echo "Workspace contents:"
+                ls -la
 
-                        git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
-                    '''
-                }
-            }
+                echo "Checking manifest directory:"
+                ls -la spring-boot-app-manifests/
+
+                echo "Checking deployment file:"
+                ls -l spring-boot-app-manifests/deployment.yml
+
+                git config user.email "afthabvadassery@gmail.com"
+                git config user.name "${GIT_USER_NAME}"
+
+                echo "Updating Docker image..."
+
+                sed -i "s|image: .*|image: afthab12/spring-boot-app:${BUILD_NUMBER}|g" spring-boot-app-manifests/deployment.yml
+
+                echo "Deployment file after update:"
+                cat spring-boot-app-manifests/deployment.yml
+
+                git add spring-boot-app-manifests/deployment.yml
+
+                git commit -m "Update spring boot image tag to ${BUILD_NUMBER} [skip ci]" || echo "No changes to commit"
+
+                echo "Pushing changes to GitHub..."
+
+                git push https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
+            '''
         }
     }
 }
