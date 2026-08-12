@@ -63,7 +63,7 @@ pipeline {
         stage('Update Deployment File') {
 
             environment {
-                GIT_REPO_NAME = "java-mavn-sonar-argocd"
+                GIT_REPO_NAME = "java-mavn-sonarqube-argocd"
                 GIT_USER_NAME = "Afthabahammed"
             }
 
